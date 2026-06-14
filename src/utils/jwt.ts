@@ -1,13 +1,27 @@
-import jwt, { type JwtPayload } from "jsonwebtoken";
+import jwt, {
+  type JwtPayload,
+  JsonWebTokenError,
+  TokenExpiredError,
+} from "jsonwebtoken";
 import { config } from "../config";
 import type { TJwtPayload } from "../types";
 
 export const verifyToken = (token: string, type: "access" | "refresh") => {
   const secret =
     type === "refresh" ? config.jwt_refresh_secret : config.jwt_secret;
-  const decoded = jwt.verify(token, secret) as JwtPayload;
-  console.log("Decoded JWT Payload:", decoded);
-  return decoded;
+
+  try {
+    const decoded = jwt.verify(token, secret) as JwtPayload;
+    return decoded;
+  } catch (error) {
+    if (error instanceof TokenExpiredError) {
+      throw new Error(`Expired ${type} token`);
+    }
+    if (error instanceof JsonWebTokenError) {
+      throw new Error(`Invalid ${type} token`);
+    }
+    throw error;
+  }
 };
 
 export const generateToken = (payload: TJwtPayload) => {

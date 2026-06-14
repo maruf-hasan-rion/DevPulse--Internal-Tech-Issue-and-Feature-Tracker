@@ -7,11 +7,18 @@ import { generateToken } from "../../utils/jwt";
 const createUser = async (req: Request, res: Response) => {
   try {
     const result = await authService.createUserInDB(req.body);
+    if (!result) {
+      return sendResponse(res, {
+        statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+        success: false,
+        message: "Failed to create user! Please try again later!",
+      });
+    }
     sendResponse(res, {
       statusCode: StatusCodes.CREATED,
       success: true,
       message: "User registered successfully",
-      data: result as Record<string, any>,
+      data: result,
     });
   } catch (error) {
     sendResponse(res, {
@@ -22,6 +29,7 @@ const createUser = async (req: Request, res: Response) => {
     });
   }
 };
+
 const loginUser = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;

@@ -31,15 +31,14 @@ const loginUser = async (email: string, password: string) => {
   }
 
   const user = existingUser[0] as IUser & { password: string };
-
   const isMatch = await bcrypt.compare(password, user.password);
-
   if (!isMatch) {
     throw new Error("Invalid Credentials!");
   }
 
   const { password: _, ...userWithoutPassword } = user;
-  return userWithoutPassword as TJwtPayload;
+
+  return userWithoutPassword;
 };
 
 const generateRefreshToken = async (refreshToken: string) => {
@@ -52,7 +51,7 @@ const generateRefreshToken = async (refreshToken: string) => {
     throw new Error("Invalid or expired refresh token");
   }
   const userData = await sql`
-    SELECT id, name, email, role 
+    SELECT id, name, email, role, created_at, updated_at 
     FROM users 
     WHERE email = ${payload.email}
   `;
