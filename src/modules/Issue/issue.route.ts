@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { issueController } from "./issue.controller";
 import auth from "../../middleware/auth";
+import { canUpdateIssue } from "../../middleware/canUpdateIssue";
 
 const router = Router();
 
@@ -15,6 +16,7 @@ router.post(
 router.patch(
   "/:id",
   auth("contributor", "maintainer"),
+  canUpdateIssue,
   issueController.updateIssue,
 );
 router.delete("/:id", auth("maintainer"), issueController.deleteIssue);
